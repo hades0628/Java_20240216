@@ -10,8 +10,10 @@ import java.time.Instant;
 import java.util.ArrayList;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 @AllArgsConstructor
+@Getter
 public class Movie {
 	
 	private long id; //영화 고유번호
@@ -95,7 +97,7 @@ public class Movie {
 	}
 
 
-	public static void delete(String movieId) {
+	public static void delete(String movieID) {
 		BufferedReader br = null;
 		String text = "";
 		String line = "";
@@ -105,7 +107,7 @@ public class Movie {
 			
 			while((line = br.readLine() )!= null) {
 				String[] temp = line.split(",");
-				if(movieId.equals(temp[0])) {
+				if(movieID.equals(temp[0])) {
 					continue;
 				}
 				text += line + "\n";
@@ -119,6 +121,40 @@ public class Movie {
 		} catch (Exception e) {			
 			e.printStackTrace();
 		}
+	}
+
+
+	public static Movie findAll(String movieID) {
+		
+		Movie movie = null;
+		BufferedReader br = null;
+						
+		try{
+			br = new BufferedReader(new FileReader(file));
+			String line = null;
+			
+			
+			while((line = br.readLine()) !=null) {
+				String[] temp = line.split(",");
+				if(movieID.equals(temp[0])) {
+					movie = new Movie(
+							Long.parseLong(temp[0]),
+							temp[1],
+							temp[2]);
+					break;
+				}
+				
+			}
+			br.close();
+			
+			return movie;
+			
+		}catch(FileNotFoundException e) {
+			e.printStackTrace();
+		}catch(IOException e) {
+			e.printStackTrace();
+		}
+		return movie;
 	}
 	
 	

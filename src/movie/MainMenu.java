@@ -1,5 +1,8 @@
 package movie;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MainMenu extends AbstractMenu {
 
 	private static final MainMenu instance = new MainMenu(null);
@@ -18,8 +21,14 @@ public class MainMenu extends AbstractMenu {
 	@Override
 	public Menu next() {
 		switch (sc.nextLine()) {
+		case "1":
+			reserve();
+			return this;
 		case "2":
 			checkReservation(); // 예매 확인
+			return this;
+		case "3":
+			cancelReservation();// 얘매 취소
 			return this;
 		case "4":
 			if (!checkAdminPassword()) {
@@ -37,13 +46,58 @@ public class MainMenu extends AbstractMenu {
 		}
 	}
 
+	private void reserve() {
+		try {
+			List<Movie> movies = Movie.findAll();
+			for (Movie movie : movies) {
+				System.out.println(movie);
+			}
+			System.out.println("예매할 영화를 선택하세요: ");
+
+			String movieId = sc.nextLine();
+			Movie movie = Movie.findAll(movieId);
+
+			ArrayList<Reservation> reservations = 
+					Reservation.findMovieId(movieId);// 예매된 자석 현황
+
+			Seats seats = new Seats(reservations);
+			seats.show();
+
+			System.out.println("좌석을 선택하세요(예:A-1): ");
+			String seatName = sc.nextLine();
+
+			seats.mark(seatName);// 좌석 예매
+
+			Reservation reservation = 
+					new Reservation(movie.getId(), movie.getTitle(), seatName);
+			reservation.save();
+
+		} catch (Exception e) {
+			System.out.printf(">> 예매에 실패하였습니다: %s\n", e.getMessage());
+			e.printStackTrace();
+		}
+
+	}
+
+	private void cancelReservation() {
+		System.out.println("휘소할 예매번호를 입력하세요: ");
+
+		Reservation canceled = Reservation.cancel(sc.nextLine());
+		if (canceled == null) {
+			System.out.println(">> 예매 내역이 없습니다.");
+		} else {
+			System.out.printf(">> [취소 완료] %s의 예매가 취소가 되었습니다.", canceled);
+		}
+
+	}
+
 	private void checkReservation() {
 		System.out.println("예매 번호를 입력하세요");
 		try {
 			Reservation reservation = Reservation.findById(sc.nextLine());
-			if(reservation == null) {
+			if (reservation == null) {
 				System.out.println(">> 예매 내역이 없습니다.");
-			}else {
+			} else {
 				System.out.println(">> [확인 완료]\n" + reservation);
 			}
 		} catch (Exception e) {
